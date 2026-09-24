@@ -1,6 +1,7 @@
 package com.insurance.customer.controller;
 
-import com.insurance.customer.entity.Customer;
+import com.insurance.customer.dto.CustomerRequest;
+import com.insurance.customer.dto.CustomerResponse;
 import com.insurance.customer.service.CustomerService;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,12 +18,14 @@ public class CustomerController {
     }
 
     @GetMapping
-    public List<Customer> getAllCustomers() {
+    public List<CustomerResponse> getAllCustomers() {
         return customerService.getAllCustomers();
     }
 
     @PostMapping
-    public Customer createCustomer(@RequestBody Customer customer) {
-        return customerService.createCustomer(customer);
+    public CustomerResponse createCustomer(
+            @RequestBody CustomerRequest request) {
+
+        return customerService.createCustomer(request);
     }
 }

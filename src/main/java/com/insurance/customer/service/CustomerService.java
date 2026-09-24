@@ -1,6 +1,9 @@
 package com.insurance.customer.service;
 
+import com.insurance.customer.dto.CustomerRequest;
+import com.insurance.customer.dto.CustomerResponse;
 import com.insurance.customer.entity.Customer;
+import com.insurance.customer.mapper.CustomerMapper;
 import com.insurance.customer.repository.CustomerRepository;
 import org.springframework.stereotype.Service;
 
@@ -10,16 +13,30 @@ import java.util.List;
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
+    private final CustomerMapper customerMapper;
 
-    public CustomerService(CustomerRepository customerRepository) {
+    public CustomerService(
+            CustomerRepository customerRepository,
+            CustomerMapper customerMapper) {
+
         this.customerRepository = customerRepository;
+        this.customerMapper = customerMapper;
     }
 
-    public List<Customer> getAllCustomers() {
-        return customerRepository.findAll();
+    public List<CustomerResponse> getAllCustomers() {
+
+        return customerRepository.findAll()
+                .stream()
+                .map(customerMapper::toResponse)
+                .toList();
     }
 
-    public Customer createCustomer(Customer customer) {
-        return customerRepository.save(customer);
+    public CustomerResponse createCustomer(CustomerRequest request) {
+
+        Customer customer = customerMapper.toEntity(request);
+
+        Customer savedCustomer = customerRepository.save(customer);
+
+        return customerMapper.toResponse(savedCustomer);
     }
 }
