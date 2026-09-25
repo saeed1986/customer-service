@@ -3,6 +3,7 @@ package com.insurance.customer.service;
 import com.insurance.customer.dto.CustomerRequest;
 import com.insurance.customer.dto.CustomerResponse;
 import com.insurance.customer.entity.Customer;
+import com.insurance.customer.exception.CustomerNotFoundException;
 import com.insurance.customer.mapper.CustomerMapper;
 import com.insurance.customer.repository.CustomerRepository;
 import org.springframework.stereotype.Service;
@@ -38,5 +39,13 @@ public class CustomerService {
         Customer savedCustomer = customerRepository.save(customer);
 
         return customerMapper.toResponse(savedCustomer);
+    }
+
+    public CustomerResponse getCustomerById(Long id) {
+
+        Customer customer = customerRepository.findById(id)
+                .orElseThrow(() -> new CustomerNotFoundException(id));
+
+        return customerMapper.toResponse(customer);
     }
 }
