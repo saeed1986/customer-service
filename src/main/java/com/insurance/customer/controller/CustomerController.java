@@ -4,6 +4,7 @@ import com.insurance.customer.dto.CustomerRequest;
 import com.insurance.customer.dto.CustomerResponse;
 import com.insurance.customer.service.CustomerService;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -22,10 +23,16 @@ public class CustomerController {
         return customerService.getAllCustomers();
     }
 
+    @GetMapping("/{id}")
+    public CustomerResponse getCustomerById(@PathVariable Long id) {
+        return customerService.getCustomerById(id);
+    }
+
     @PostMapping
     public CustomerResponse createCustomer(
-            @RequestBody CustomerRequest request) {
+            @Valid @RequestBody CustomerRequest request) {
 
         return customerService.createCustomer(request);
     }
+
 }
