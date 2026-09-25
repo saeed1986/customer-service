@@ -48,4 +48,25 @@ public class CustomerService {
 
         return customerMapper.toResponse(customer);
     }
+
+    public void deleteCustomerById(long id) {
+        customerRepository.deleteById(id);
+    }
+
+    public CustomerResponse updateCustomer(
+            Long id,
+            CustomerRequest request) {
+
+        Customer customer = customerRepository.findById(id)
+                .orElseThrow(() -> new CustomerNotFoundException(id));
+
+        customer.setFirstName(request.getFirstName());
+        customer.setLastName(request.getLastName());
+        customer.setEmail(request.getEmail());
+        customer.setDateOfBirth(request.getDateOfBirth());
+
+        Customer updatedCustomer = customerRepository.save(customer);
+
+        return customerMapper.toResponse(updatedCustomer);
+    }
 }
