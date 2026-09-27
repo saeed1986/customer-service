@@ -12,12 +12,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import com.insurance.customer.exception.CustomerNotFoundException;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -191,5 +190,118 @@ class CustomerServiceTest {
         verify(customerRepository).findById(customerId);
         verify(customerRepository).save(customer);
         verify(customerMapper).toResponse(customer);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenUpdatingNonExistingCustomer() {
+
+        // Arrange
+        Long customerId = 999L;
+
+        CustomerRequest request = new CustomerRequest();
+        request.setFirstName("Max");
+        request.setLastName("Mustermann");
+        request.setEmail("max@example.com");
+        request.setDateOfBirth(LocalDate.of(1990, 5, 10));
+
+        when(customerRepository.findById(customerId))
+                .thenReturn(Optional.empty());
+
+        // Act & Assert
+        CustomerNotFoundException exception =
+                assertThrows(
+                        CustomerNotFoundException.class,
+                        () -> customerService.updateCustomer(
+                                customerId,
+                                request
+                        )
+                );
+
+        assertEquals(
+                "Customer not found with id: 999",
+                exception.getMessage()
+        );
+
+        // Verify
+        verify(customerRepository).findById(customerId);
+    }
+
+    @Test
+    void shouldReturnAllCustomers() {
+
+        // Arrange
+        Customer customer1 = new Customer();
+        customer1.setFirstName("Max");
+        customer1.setLastName("Mustermann");
+        customer1.setEmail("max@example.com");
+        customer1.setDateOfBirth(LocalDate.of(1990, 5, 10));
+
+        Customer customer2 = new Customer();
+        customer2.setFirstName("Anna");
+        customer2.setLastName("Musterfrau");
+        customer2.setEmail("anna@example.com");
+        customer2.setDateOfBirth(LocalDate.of(1992, 8, 20));
+
+        CustomerResponse response1 = new CustomerResponse();
+        response1.setFirstName("Max");
+        response1.setLastName("Mustermann");
+        response1.setEmail("max@example.com");
+        response1.setDateOfBirth(LocalDate.of(1990, 5, 10));
+
+        CustomerResponse response2 = new CustomerResponse();
+        response2.setFirstName("Anna");
+        response2.setLastName("Musterfrau");
+        response2.setEmail("anna@example.com");
+        response2.setDateOfBirth(LocalDate.of(1992, 8, 20));
+
+        when(customerRepository.findAll())
+                .thenReturn(List.of(customer1, customer2));
+
+        when(customerMapper.toResponse(customer1))
+                .thenReturn(response1);
+
+        when(customerMapper.toResponse(customer2))
+                .thenReturn(response2);
+
+        // Act
+        List<CustomerResponse> result =
+                customerService.getAllCustomers();
+
+        // Assert
+        assertEquals(2, result.size());
+
+        assertEquals(
+                "Max",
+                result.get(0).getFirstName()
+        );
+
+        assertEquals(
+                "Anna",
+                result.get(1).getFirstName()
+        );
+
+        // Verify
+        verify(customerRepository).findAll();
+        verify(customerMapper).toResponse(customer1);
+        verify(customerMapper).toResponse(customer2);
+    }
+
+    @Test
+    void shouldReturnEmptyListWhenThereAreNoCustomers() {
+
+        // Arrange
+        when(customerRepository.findAll())
+                .thenReturn(List.of());
+
+        // Act
+        List<CustomerResponse> result =
+                customerService.getAllCustomers();
+
+        // Assert
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+
+        // Verify
+        verify(customerRepository).findAll();
     }
 }
